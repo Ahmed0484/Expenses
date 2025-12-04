@@ -6,7 +6,6 @@ Run the app using: `start-app.bat`
 ## How to Run
 1. Install dependencies: `npm install`  
 2. Start the app: run `start-app.bat`  
-3. Open the browser at: http://localhost:3000
 
 ## About
 A simple expenses tracking app using React for the UI and JSON-Server as a mock backend.
