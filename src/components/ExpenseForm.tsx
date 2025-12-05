@@ -7,21 +7,24 @@ type Props = {
     setExpense?: (expense: Expense) => void;
 }
 const apiUrl = import.meta.env.VITE_API_URL;
+
+
 export default function ExpenseForm({ expense, setExpense }: Props) {
     const navigate = useNavigate();
     const [maxId, setMaxId] = useState<number>(0);
     const [expenses, setExpenses] = useState<Expense[]>([]);
+    const [error, setError] = useState("");
     const fetched = useRef(false);
-      useEffect(() => {
+    useEffect(() => {
         if (!fetched.current) {
-          fetch(`${apiUrl}/expenses?_sort=date&_order=asc`).then(res => {
-            return res.json();
-          }).then(data => {
-            setExpenses(data);
-          });
-          fetched.current = true;
+            fetch(`${apiUrl}/expenses?_sort=date&_order=asc`).then(res => {
+                return res.json();
+            }).then(data => {
+                setExpenses(data);
+            });
+            fetched.current = true;
         }
-      }, []);
+    }, []);
     useEffect(() => {
         const maxId = expenses.length
             ? Math.max(...expenses.map(item => item.id))
@@ -31,15 +34,21 @@ export default function ExpenseForm({ expense, setExpense }: Props) {
     const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
+        const price = Number(formData.get("price"));
+        if (price <= 0) {
+            setError("Price must be greater than 0");
+            return;
+        }
+        setError("");
         const url = expense ? `${apiUrl}/expenses/${expense.id}` : `${apiUrl}/expenses`;
         const method = expense ? 'PUT' : 'POST';
         try {
             const response = await fetch(url, {
                 method: method,
                 body: JSON.stringify({
-                    id:!expense?String(maxId+1):expense.id,
+                    id: !expense ? String(maxId + 1) : expense.id,
                     name: formData.get('name'),
-                    price: Number(formData.get('price')),
+                    price: price,
                     date: new Date(formData.get('date') as string)
                 })
             });
@@ -69,19 +78,20 @@ export default function ExpenseForm({ expense, setExpense }: Props) {
             <form onSubmit={onSubmit}>
                 <label>Name</label>
                 <div className="flex gap-3">
-                    <input type="text" name='name' placeholder="name"
+                    <input required type="text" name='name' placeholder="name"
                         className="border border-gray-300 rounded-lg p-2 w-1/4"
                         defaultValue={expense?.name || ''}
                     />
                 </div>
                 <div className="flex gap-3">
-                    <input type="number" name='price' placeholder="price"
+                    <input type="number" step="any" required name='price' placeholder="price"
                         className="border border-gray-300 rounded-lg p-2 w-1/4"
                         defaultValue={expense?.price || 0}
                     />
+                    {error && <p style={{ color: "red" }}>{error}</p>}
                 </div>
                 <div className="flex gap-3">
-                    <input type="date" name='date'
+                    <input required type="date" name='date'
                         className="border border-gray-300 rounded-lg p-2 w-1/4"
                         defaultValue={toDateInputValue(expense?.date) || toDateInputValue(new Date())}
                     />
