@@ -1,10 +1,6 @@
 {
-  "expenses": [
-    {
-      "name": "soda",
-      "price": 15,
-      "date": "2025-12-04T00:00:00.000Z",
-      "id": "5651"
-    }
-  ]
+  "expenses": [],
+  "budget": {
+    "amount": 6500
+  }
 }
